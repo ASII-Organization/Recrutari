@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="charset=UTF-8">
+	<meta name="viewport" content="width=device-width">
+	<link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700' rel='stylesheet' type='text/css'>
+	<link rel="stylesheet" href="design.css" />
+</head>
+<body>
+<img src="images/background.png" class="bgimg"/>
+<div id="wrapper">
+	<div id="header">
+		<img class="logo" src="images/logo.png"/>
+		<div style="width: 20%; position:relative; float:right; height:100%;">
+			<a href="http://www.asii.ro">
+				<img src="images/back.png" alt="" style="widht: 80%; height: 80%; padding-right: 40px;"/>
+			</a>
+			<label style="position: absolute; top: 17%; right:25%;"><b><font size="3%">Recrutari</font></b></label>
+		</div>
+	</div>
+</div><!-- #header -->
+<div id="content">
+	<h1>ASII recruteaza din nou!</h1>
+	<p>Incepand cu data de 1 Martie Asociatia Studentilor informaticieni ieseni a redeschis
+		portile pentru noi membri dornici sa faca parte dintr-o comunitate axata pe IT, cu oameni
+		harnici si plini de entuziasm. Daca doresti sa ni te alaturi te rugam sa descarci formularul apasand pe butonul de mai jos.
+		<a href="http://recrutari.asii.ro/RectruatiASII.docx" download><div class="buttonDesc">
+			<div class="icon"><img src="images/download.png" alt="Download"/></div>
+			<div class="text">Descarca</div>
+			<div class="clearfloat"></div>
+		</div></a>
+		<br/>
+		<h2>Timp ramas pentru inscrieri</h2>
+		<div id="countbox1"></div>
+</div>
+<!-- #content -->
+
+<div id="footer">
+	<div class="container">
+		Asociaţia Studenţilor Informaticieni Ieşeni (AŞII) este reprezentată de un grup de persoane determinate, creative şi dinamice, ce au în comun pasiunea pentru Informatică şi împărtăşesc un set de ţeluri şi valori. Activităţile organizate în cadrul asociaţiei se adresează studenţilor şi profesorilor Facultăţii de Informatică Iaşi, dar şi comunităţii IT din România, dorind să promoveze proactivitatea, dezvoltarea profesională, personală şi socială. <br /> Copyright &copy; ASII 2016
+	</div>
+</div>
+
+</body>
+<script>
+	var CDown = function() {
+		this.state=0;
+		this.counts=[];
+		this.interval=null;
+	};
+	CDown.prototype = {
+		init: function(){
+			this.state=1;
+			var self=this;
+			this.interval=window.setInterval(function(){self.tick();}, 1000);
+		},
+		add: function(date,id){
+			this.counts.push({d:date,id:id});
+			this.tick();
+			if(this.state==0) this.init();
+		},
+		expire: function(idxs){
+			for(var x in idxs) {
+				this.display(this.counts[idxs[x]], "Now!");
+				this.counts.splice(idxs[x], 1);
+			}
+		},
+		format: function(r){
+			var out="";
+			if(r.d != 0){out += r.d +" "+((r.d==1)?"<span>zi</span>":"<span>zile</span>")+"  ";}
+			if(r.h != 0){out += r.h +" "+((r.h==1)?"<span>ora</span>":"<span>ore</span>")+"  ";}
+			out += r.m +" "+((r.m==1)?"<span>minut</span>":"<span>minute</span>")+"  ";
+			out += r.s +" "+((r.s==1)?"<span>secunda</span>":"<span>secs</span>")+"  ";
+
+			return out.substr(0,out.length-2);
+		},
+		math: function(work){
+			var	y=w=d=h=m=s=ms=0;
+
+			ms=(""+((work%1000)+1000)).substr(1,3);
+			work=Math.floor(work/1000);//kill the "milliseconds" so just secs
+
+			y=Math.floor(work/31536000);//years (no leapyear support)
+			w=Math.floor(work/604800);//weeks
+			d=Math.floor(work/86400);//days
+			work=work%86400;
+
+			h=Math.floor(work/3600);//hours
+			work=work%3600;
+
+			m=Math.floor(work/60);//minutes
+			work=work%60;
+
+			s=Math.floor(work);//seconds
+
+			return {y:y,w:w,d:d,h:h,m:m,s:s,ms:ms};
+		},
+		tick: function(){
+			var now=(new Date()).getTime(),
+					expired=[],cnt=0,amount=0;
+
+			if(this.counts)
+				for(var idx=0,n=this.counts.length; idx<n; ++idx){
+					cnt=this.counts[idx];
+					amount=cnt.d.getTime()-now;//calc milliseconds between dates
+
+					// if time is already past
+					if(amount<0){
+						expired.push(idx);
+					}
+					// date is still good
+					else{
+						this.display(cnt, this.format(this.math(amount)));
+					}
+				}
+
+			// deal with any expired
+			if(expired.length>0) this.expire(expired);
+
+			// if no active counts, stop updating
+			if(this.counts.length==0) window.clearTimeout(this.interval);
+
+		},
+		display: function(cnt,msg){
+			document.getElementById(cnt.id).innerHTML=msg;
+		}
+	};
+
+	window.onload=function(){
+		var cdown = new CDown();
+
+		cdown.add(new Date(2016,1,26,0,16,8), "countbox1");
+	};
+</script>
+</html>
